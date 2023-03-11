@@ -39,6 +39,15 @@
                 </properties>
             </property>
         </propertyGroup>
+        <propertyGroup caption="Message handling">
+            <property key="messageAttribute" type="attribute" required="false">
+                <caption>Message attribute</caption>
+                <description>Attribute the message will be stored in</description>
+                <attributeTypes>
+                    <attributeType name="String" />
+                </attributeTypes>
+            </property>
+        </propertyGroup>
         <propertyGroup caption="Websocket close behaviour">
             <propertyGroup caption="Client side">
                 <property key="timeoutAction" type="action">

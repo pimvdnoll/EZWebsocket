@@ -12,6 +12,7 @@ export function EZWebsocket({
     objectId,
     websocketIdentifier,
     actionConfig,
+    messageAttribute,
     timeoutAction,
     navigateAction,
     onCloseMicroflowParameterValue
@@ -52,18 +53,14 @@ export function EZWebsocket({
         };
 
         ws.onmessage = event => {
-            // Find the action to execute for the received triggerstring
-            let config = actionConfig.find(config => {
-                return config.trigger === event.data;
-            });
-            if (!config) {
-                console.log("Action " + event.data + " not implemented");
-                return;
-            }
-            console.debug("Execute action: " + event.data);
-            config.action && config.action.canExecute
-                ? config.action.execute()
-                : console.error("Action " + event.data + " could not be executed");
+            // eventdata looks like this:
+            // {
+            //    "action": "<actiontrigger>",
+            //    "message": "<message>"
+            // }
+            let payload = JSON.parse(event.data);
+            setMessage(payload.message);
+            executeAction(payload.action);
         };
 
         ws.onclose = event => {
@@ -76,6 +73,36 @@ export function EZWebsocket({
 
         // Store connection inside ref so we can keep track through rendercycles
         connection.current = ws;
+
+        const executeAction = (action: string) => {
+            if (!action) return;
+            // Find the action to execute for the received triggerstring
+            let config = actionConfig.find(config => {
+                return config.trigger === action;
+            });
+            if (!config) {
+                console.log("Action " + action + " not implemented");
+                return;
+            }
+            console.debug("Execute action: " + action);
+            config.action && config.action.canExecute
+                ? config.action.execute()
+                : console.error("Action " + action + " could not be executed");
+        };
+    
+        const setMessage = (message: string) => {
+            if (!message) return;
+            if (!messageAttribute) {
+                console.debug("messageAttribute not set"); 
+                return;
+            }
+            if (messageAttribute?.readOnly) {
+                console.debug("cannot set messageAttribute, as it is readOnly"); 
+                return;
+            }
+            messageAttribute.setValue(message);
+        };
     };
+
     return null;
 }

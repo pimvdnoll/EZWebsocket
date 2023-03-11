@@ -4,7 +4,7 @@
  * @author Mendix UI Content Team
  */
 import { CSSProperties } from "react";
-import { ActionValue, DynamicValue } from "mendix";
+import { ActionValue, DynamicValue, EditableValue } from "mendix";
 
 export interface ActionConfigType {
     trigger: string;
@@ -22,6 +22,7 @@ export interface EZWebsocketNativeProps<Style> {
     websocketIdentifier: DynamicValue<string>;
     objectId: DynamicValue<string>;
     actionConfig: ActionConfigType[];
+    messageAttribute?: EditableValue<string>;
     timeoutAction?: ActionValue;
     navigateAction?: ActionValue;
     onCloseMicroflowParameterValue?: DynamicValue<string>;
@@ -39,6 +40,7 @@ export interface EZWebsocketNativePreviewProps {
     websocketIdentifier: string;
     objectId: string;
     actionConfig: ActionConfigPreviewType[];
+    messageAttribute: string;
     timeoutAction: {} | null;
     navigateAction: {} | null;
     onCloseMicroflowParameterValue: string;

@@ -11,7 +11,7 @@ public class WebsocketUtils {
     private static Map<String, WebsocketEndpoint> websockets = new HashMap<String, WebsocketEndpoint>();
 
     public static void addWebsocketEndpoint(String websocketIdentifier, Long sessionTimeout) {
-        if (websocketIdentifier.isEmpty()) {
+        if (websocketIdentifier == null || websocketIdentifier.isEmpty()) {
             throw new RuntimeException("websocketIdentifier cannot be empty");
         }
         if (sessionTimeout == null) {
@@ -31,16 +31,16 @@ public class WebsocketUtils {
 
     public static void addWebsocketEndpointWithOnCloseMicroflow(String websocketIdentifier, Long sessionTimeout,
             String onCloseMicroflow, String onCloseMicroflowParameterKey) {
-        if (websocketIdentifier.isEmpty()) {
+        if (websocketIdentifier == null || websocketIdentifier.isEmpty()) {
             throw new RuntimeException("websocketIdentifier cannot be empty");
         }
         if (sessionTimeout == null) {
             throw new RuntimeException("sessionTimeout cannot be empty (use 0 for infinite sessions)");
         }
-        if (onCloseMicroflow.isEmpty()) {
+        if (onCloseMicroflow == null || onCloseMicroflow.isEmpty()) {
             throw new RuntimeException("onCloseMicroflow cannot be empty");
         }
-        if (onCloseMicroflowParameterKey.isEmpty()) {
+        if (onCloseMicroflowParameterKey == null || onCloseMicroflowParameterKey.isEmpty()) {
             throw new RuntimeException("onCloseMicroflowParameterKey cannot be empty");
         }
         // Create websocket handler
@@ -57,26 +57,27 @@ public class WebsocketUtils {
         websockets.put(websocketIdentifier, websocketEndpoint);
     }
 
-    public static void notify(String objectId, String action, String websocketIdentifier) {
-        if (objectId.isEmpty()) {
+    public static void notify(String objectId, String action, String message, String websocketIdentifier) {
+        if (objectId == null || objectId.isEmpty()) {
             throw new RuntimeException("objectId cannot be empty");
         }
-        if (action.isEmpty()) {
-            throw new RuntimeException("action cannot be empty");
+        if ((action == null || action.isEmpty()) && (message == null || message.isEmpty())) {
+            throw new RuntimeException("action and message cannot both be empty");
         }
-        if (websocketIdentifier.isEmpty()) {
+        if (websocketIdentifier == null || websocketIdentifier.isEmpty()) {
             throw new RuntimeException("websocketIdentifier cannot be empty");
         }
         WebsocketEndpoint websocketEndpoint = getWebsocket(websocketIdentifier);
-        websocketEndpoint.notify(objectId, action);
+        websocketEndpoint.notify(objectId, action, message);
     }
 
     private static WebsocketEndpoint getWebsocket(String websocketIdentifier) {
         WebsocketEndpoint websocketEndpoint = websockets.get(websocketIdentifier);
-        if (websocketEndpoint != null)
+        if (websocketEndpoint != null) {
             return websocketEndpoint;
-        else
+        } else {
             throw new RuntimeException("Websocket not found for id: " + websocketIdentifier);
+        }
     }
 
 }

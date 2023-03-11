@@ -44,13 +44,22 @@
                 </properties>
             </property>
         </propertyGroup>
+        <propertyGroup caption="Message handling">
+            <property key="messageAttribute" type="attribute" required="false">
+                <caption>Message attribute</caption>
+                <description>Attribute the message will be stored in</description>
+                <attributeTypes>
+                    <attributeType name="String" />
+                </attributeTypes>
+            </property>
+        </propertyGroup>
         <propertyGroup caption="Websocket close behaviour">
             <propertyGroup caption="Client side">
-                <property key="timeoutAction" type="action">
+                <property key="timeoutAction" type="action" required="false">
                     <caption>Timeout action</caption>
                     <description>Action to perform when websocket connection closes due to a session timeout</description>
                 </property>
-                <property key="navigateAction" type="action">
+                <property key="navigateAction" type="action" required="false">
                     <caption>Navigate action</caption>
                     <description>Action to perform when websocket connection closes due to the user navigating away (does not fire when the tab/browser is closed)</description>
                 </property>
