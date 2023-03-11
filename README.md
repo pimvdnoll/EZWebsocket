@@ -16,7 +16,7 @@ Allow for real-time server to client communication using websockets without exte
 
 -   [x] **v1.1.0 update** Configure server-side microflow to be fired on websocket close
 
--   [X] **v.1.3.0 update** Added listener widget for native
+-   [X] **v1.3.0 update** Added listener widget for native
 
 -   [X] **v.1.4.0 update** Added message feature
 
@@ -95,3 +95,7 @@ on sessiontimeout here
 ## Issues, suggestions and feature requests
 
 [Issues](https://github.com/nathan-JJRplus/EZWebsocket/issues)
+
+## Known issues
+
+No support for multi-instance yet
