@@ -18,6 +18,8 @@ Allow for real-time server to client communication using websockets without exte
 
 -   [X] **v1.3.0 update** Added listener widget for native
 
+-   [X] **v.1.4.0 update** Added message feature
+
 ## Usage
 
 ### Initialize webserver
@@ -51,6 +53,10 @@ If you initialize the websocket with the `JA_AddWebsocketEndpoint_WithOnCloseMic
 
 4. Configure one or more trigger/action combination(s)
 
+#### Message handling tab
+
+**Message attribute**: Configure attribute to receive messages sent directly from the notify action on
+
 #### Websocket close behaviour tab
 
 **Timeout action**: If you configured a sessiontimeout during the initialization you can configure the action to perform
@@ -79,6 +85,12 @@ on sessiontimeout here
 3. Fill the websocket identifier with the same identifier from the websocket initialization
 
 4. Configure the action trigger configured in the client widget
+
+**or**
+
+5. Add a message you want to send to the clients
+
+> Note that the message attribute gets set before the action is executed so that the message is directly available inside the action
 
 ## Issues, suggestions and feature requests
 

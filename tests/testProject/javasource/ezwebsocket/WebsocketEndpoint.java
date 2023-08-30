@@ -1,7 +1,6 @@
 package ezwebsocket;
 
 import javax.websocket.CloseReason;
-import javax.websocket.CloseReason.CloseCodes;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
@@ -14,7 +13,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Collection;
 
 import com.mendix.core.Core;
 import com.mendix.logging.ILogNode;
@@ -43,16 +41,22 @@ public class WebsocketEndpoint extends Endpoint {
     this.onCloseMicroflowParameterKey = onCloseMicroflowParameterKey;
   }
 
-  void notify(String objectId, String action) {
+  void notify(String objectId, String action, String message) {
+    // Construct message
+    JSONObject payload = new JSONObject();
+    payload.put("action", action);
+    payload.put("message", message);
+    String payloadString = payload.toString();
     // Retrieve all subscriptions by objectId
     Set<Async> remotes = this.getSubscriptions(objectId);
-    // Send actiontrigger to all sessions
+    // Send payload to all sessions
     for (Async remote : remotes) {
       try {
-        remote.sendText(action);
+        remote.sendText(payloadString);
       } catch (RuntimeException re) {
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
           LOG.debug("RuntimeException while sending: " + re.getMessage());
+        }
       }
     }
   }
@@ -61,29 +65,30 @@ public class WebsocketEndpoint extends Endpoint {
   private Map<Session, Map<String, String>> subscriptions = new HashMap<Session, Map<String, String>>();
 
   private void addSubscription(Session session, String jsonData) {
-
     try {
       Map<String, String> parameters = parseJsonData(jsonData);
       validateSession(parameters.get("csrfToken"));
-      if (LOG.isTraceEnabled())
+      if (LOG.isTraceEnabled()) {
         LOG.trace("Adding subscription: " + session.getId() + " for objectId: " + parameters.get("objectId"));
+      }
       subscriptions.put(session, parameters);
     } catch (RuntimeException re) {
       throw new RuntimeException("Connection refused: " + re.getMessage());
     }
-
   }
 
   private void removeSubscription(Session session) {
-    if (LOG.isTraceEnabled())
+    if (LOG.isTraceEnabled()) {
       LOG.trace("Removing subscription: " + session.getId());
+    }
     // If onCloseMicroflow is configured, execute it
-    if (!onCloseMicroflow.isEmpty()) {
-      if (LOG.isTraceEnabled())
-        LOG.trace("Executing onCloseMicroflow " + onCloseMicroflow);
+    if (onCloseMicroflow != null && !onCloseMicroflow.isEmpty()) {
       String onCloseMicroflowParameterValue = subscriptions.get(session).get("onCloseMicroflowParameterValue");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Scheduling onCloseMicroflow:" + onCloseMicroflow + " with parametervalue: " + onCloseMicroflowParameterValue);
+      }
       Core.microflowCall(onCloseMicroflow).withParam(onCloseMicroflowParameterKey, onCloseMicroflowParameterValue)
-          .execute(Core.createSystemContext());
+          .executeInBackground(Core.createSystemContext(), "EZWebsocket.TQ_OnCloseMicroflowCall");
     }
     subscriptions.remove(session);
   }
@@ -101,8 +106,7 @@ public class WebsocketEndpoint extends Endpoint {
 
   @Override
   public void onOpen(Session session, EndpointConfig config) {
-    LOG.info(session.getContainer());
-    LOG.info(config.getUserProperties().entrySet().toString());
+    LOG.trace(config.getUserProperties().entrySet().toString());
     session.setMaxIdleTimeout(sessionTimeout * 1000);
     session.addMessageHandler(new MessageHandler.Whole<String>() {
       @Override
@@ -124,10 +128,12 @@ public class WebsocketEndpoint extends Endpoint {
 
   @Override
   public void onClose(Session session, CloseReason closeReason) {
-    if (subscriptions.containsKey(session))
+    if (subscriptions.containsKey(session)) {
       removeSubscription(session);
-    if (LOG.isDebugEnabled())
-      LOG.debug("Received onClose call with reason: " + closeReason.getCloseCode() + ", " + closeReason.getReasonPhrase());
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Received onClose call with reason: " + closeReason.getCloseCode().getCode() + ", " + closeReason.getReasonPhrase());
+    }
   }
 
   private Map<String, String> parseJsonData(String jsonData) {
@@ -151,8 +157,9 @@ public class WebsocketEndpoint extends Endpoint {
     Iterator<? extends ISession> activeSessions = Core.getActiveSessions().iterator();
     while (activeSessions.hasNext()) {
       ISession session = activeSessions.next();
-      if (session.getCsrfToken().equals(csrfToken))
+      if (session.getCsrfToken().equals(csrfToken)) {
         return true;
+      } 
     }
     throw new RuntimeException("Invalid csrfToken");
   }

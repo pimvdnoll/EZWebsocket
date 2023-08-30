@@ -22,20 +22,22 @@ public class JA_Notify extends CustomJavaAction<java.lang.Boolean>
 	private java.lang.String websocketIdentifier;
 	private java.lang.String objectId;
 	private java.lang.String action;
+	private java.lang.String message;
 
-	public JA_Notify(IContext context, java.lang.String websocketIdentifier, java.lang.String objectId, java.lang.String action)
+	public JA_Notify(IContext context, java.lang.String websocketIdentifier, java.lang.String objectId, java.lang.String action, java.lang.String message)
 	{
 		super(context);
 		this.websocketIdentifier = websocketIdentifier;
 		this.objectId = objectId;
 		this.action = action;
+		this.message = message;
 	}
 
 	@java.lang.Override
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-		WebsocketUtils.notify(objectId, action, websocketIdentifier);
+		WebsocketUtils.notify(objectId, action, message, websocketIdentifier);
 		return true;
 		// END USER CODE
 	}
